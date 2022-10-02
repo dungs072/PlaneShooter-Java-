@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -19,6 +20,7 @@ public class Enemy extends Entity implements IUpdate{
     
     private int maxCol = 0;
     private int maxRow = 0;
+    private String[] pathMaps = {"/Paths/map.txt","/Paths/map2.txt","/Paths/map3.txt"};
     public Enemy(GamePanel gamePanel)
     {
         this.gamePanel = gamePanel;
@@ -55,7 +57,9 @@ public class Enemy extends Entity implements IUpdate{
     private void loadMap()
     {
         try {
-            InputStream is = getClass().getResourceAsStream("/Paths/map.txt");
+            Random random = new Random();
+            int randomNumber = random.nextInt(0,pathMaps.length);
+            InputStream is = getClass().getResourceAsStream(pathMaps[randomNumber]);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             int col = 0;
             int row = 0;
@@ -159,6 +163,7 @@ public class Enemy extends Entity implements IUpdate{
             calculateDesiredPosition();
         }  
         if(!isMovedToRightPosition(desiredPosition.getX(), desiredPosition.getY())){return;}
+        mapPoints[currentMapPosition.getY()][currentMapPosition.getX()] = 0;
         currentMapPosition.setXY(desiredPosition.getX()/gamePanel.getTileSize(), 
                                 desiredPosition.getY()/gamePanel.getTileSize());
         nextDirection = Direction.NONE;

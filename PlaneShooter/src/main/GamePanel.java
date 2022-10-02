@@ -30,7 +30,8 @@ public class GamePanel extends JPanel implements Runnable{
         keyHandler = new KeyHandler();
         player = new Player(this, keyHandler);
         backGround = new Background();
-        enemies.add(new Enemy(this));
+       
+       
     }
     public int getTileSize(){return tileSize;}
     public int getMaxScreenCol(){return maxScreenCol;}
@@ -53,6 +54,17 @@ public class GamePanel extends JPanel implements Runnable{
     {
         gameThread = new Thread(this);
         gameThread.start();
+        
+        for(int i =0;i<3;i++)
+        {
+            try {
+                Thread.sleep(2000);
+                enemies.add(new Enemy(this));
+            } catch (InterruptedException e) {
+                
+                e.printStackTrace();
+            }
+        }
     
     }
     @Override
