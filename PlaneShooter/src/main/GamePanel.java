@@ -1,8 +1,8 @@
 package main;
 import java.awt.*;
-import java.util.ArrayList;
 import javax.swing.JPanel;
 import Entities.*;
+import Entities.Interface.IPoolObject;
 
 public class GamePanel extends JPanel implements Runnable{
     //Screen settings
@@ -24,13 +24,19 @@ public class GamePanel extends JPanel implements Runnable{
     private Background backGround;
 
     //Pool
-    private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
+    private PoolManager enemyPoolManager;
 
+    //Delta time
+    private long deltaTime = 0;
+
+    //enemies
+    private float timeSpawnEnemyAfterSecond = 2;
+    private float accumulateTimeSpawnEnemy = 0;
     {
         keyHandler = new KeyHandler();
         player = new Player(this, keyHandler);
         backGround = new Background();
-       
+        enemyPoolManager = new PoolManager();
        
     }
     public int getTileSize(){return tileSize;}
@@ -55,17 +61,7 @@ public class GamePanel extends JPanel implements Runnable{
         gameThread = new Thread(this);
         gameThread.start();
         
-        for(int i =0;i<3;i++)
-        {
-            try {
-                Thread.sleep(2000);
-                enemies.add(new Enemy(this));
-            } catch (InterruptedException e) {
-                
-                e.printStackTrace();
-            }
-        }
-    
+      
     }
     @Override
     public void run() {
@@ -83,6 +79,7 @@ public class GamePanel extends JPanel implements Runnable{
                 {
                     remainingTime = 0;
                 }
+                deltaTime = (long)remainingTime;
                 Thread.sleep((long)remainingTime);
                 nextDrawTime+=drawInterval;
             }catch(InterruptedException e)
@@ -94,9 +91,11 @@ public class GamePanel extends JPanel implements Runnable{
     public void update()
     {
         player.update();
+        spawnEnemy();
         updateEnemy();
         
     }
+    
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
@@ -108,16 +107,36 @@ public class GamePanel extends JPanel implements Runnable{
         g2.dispose();
     }
     //enemy
+    private void spawnEnemy()
+    {
+        accumulateTimeSpawnEnemy+=deltaTime;   
+        if(accumulateTimeSpawnEnemy<timeSpawnEnemyAfterSecond*1000){return;}
+        accumulateTimeSpawnEnemy = 0;
+        
+        IPoolObject tempObj = enemyPoolManager.getReadyObject();
+        if(tempObj!=null)
+        {
+            tempObj.reuseObj();
+        }
+        else
+        {
+            enemyPoolManager.AddPoolObject(new Enemy(this));
+        }
+      
+    }
+
     private void updateEnemy()
     {
-        for (Enemy enemy : enemies) {
-            enemy.update();
+        for (var enemy : enemyPoolManager.getPoolObjs()) {
+            Enemy newEnemy = (Enemy)enemy;
+            newEnemy.update();
         }
     }
     private void paintEnemy(Graphics2D g2)
     {
-        for (Enemy enemy : enemies) {
-            enemy.draw(g2);
+        for (var enemy : enemyPoolManager.getPoolObjs()) {
+            Enemy newEnemy = (Enemy)enemy;
+            newEnemy.draw(g2);
         }
     }
 }

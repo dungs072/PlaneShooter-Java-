@@ -9,9 +9,11 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import Entities.Interface.IPoolObject;
+import Entities.Interface.IUpdate;
 import main.GamePanel;
 
-public class Enemy extends Entity implements IUpdate{
+public class Enemy extends Entity implements IUpdate, IPoolObject{
     private int[][] mapPoints;
     private GamePanel gamePanel;
     private Direction nextDirection;
@@ -20,7 +22,8 @@ public class Enemy extends Entity implements IUpdate{
     
     private int maxCol = 0;
     private int maxRow = 0;
-    private String[] pathMaps = {"/Paths/map.txt","/Paths/map2.txt","/Paths/map3.txt"};
+    private String[] pathMaps = {"/Paths/map.txt","/Paths/map2.txt","/Paths/map3.txt",
+                                "/Paths/map4.txt","/Paths/map5.txt"};
     public Enemy(GamePanel gamePanel)
     {
         this.gamePanel = gamePanel;
@@ -191,6 +194,21 @@ public class Enemy extends Entity implements IUpdate{
     {
         g2.drawImage(entityImage, worldX, worldY,null);
     }
+    @Override
+    public boolean canReuse() {
+        
+        return isReachDestination();
+    }
+    @Override
+    public void reuseObj() {
+        setDefaultValue();
+        nextDirection = Direction.NONE;
+    }
+    private boolean isReachDestination()
+    {
+        return currentMapPosition.getY()==maxRow-1;
+    }
+   
 
 
 }

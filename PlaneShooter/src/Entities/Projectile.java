@@ -2,6 +2,8 @@ package Entities;
 import java.awt.Graphics2D;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+
+import Entities.Interface.IUpdate;
 public class Projectile extends Entity implements Runnable, IUpdate {
 
     private boolean wantToDestroy = false;

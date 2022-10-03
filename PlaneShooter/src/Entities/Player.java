@@ -2,6 +2,9 @@ package Entities;
 import java.awt.Graphics2D;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+
+import Entities.Interface.IUpdate;
+
 import java.util.ArrayList;
 
 import main.*;
