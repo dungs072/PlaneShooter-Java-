@@ -1,6 +1,7 @@
 package Entities;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +17,7 @@ import main.GamePanel;
 public class Enemy extends Entity implements IUpdate, IPoolObject{
     private int[][] mapPoints;
     private GamePanel gamePanel;
-    private Direction nextDirection;
+
     private MapVector2 currentMapPosition;
     private MapVector2 desiredPosition;
     
@@ -38,6 +39,7 @@ public class Enemy extends Entity implements IUpdate, IPoolObject{
         maxCol = gamePanel.getMaxScreenCol();
         maxRow = gamePanel.getMaxScreenRow()+2;
         mapPoints = new int[maxRow][maxCol];
+        solidArea = new Rectangle(0,0,105,96);
         setDefaultValue();
         
     }
@@ -158,7 +160,7 @@ public class Enemy extends Entity implements IUpdate, IPoolObject{
         desiredPosition.setXY(x*gamePanel.getTileSize(), y*gamePanel.getTileSize());
     }
     @Override
-    public void update() {
+    public void update(long deltaTime) {
         Move();
         if(nextDirection==Direction.NONE)
         {
@@ -192,6 +194,7 @@ public class Enemy extends Entity implements IUpdate, IPoolObject{
     }
     public void draw(Graphics2D g2)
     {
+        g2.fillRect(worldX, worldY, 105, 96);
         g2.drawImage(entityImage, worldX, worldY,null);
     }
     @Override
@@ -208,7 +211,6 @@ public class Enemy extends Entity implements IUpdate, IPoolObject{
     {
         return currentMapPosition.getY()==maxRow-1;
     }
-   
 
-
+    
 }

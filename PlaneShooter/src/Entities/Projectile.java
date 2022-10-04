@@ -1,14 +1,17 @@
 package Entities;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+import Entities.Interface.IPoolObject;
 import Entities.Interface.IUpdate;
-public class Projectile extends Entity implements Runnable, IUpdate {
+public class Projectile extends Entity implements IUpdate,IPoolObject {
 
-    private boolean wantToDestroy = false;
+    private boolean isReadyToReuse = false;
     private int timeDestroyitSelf = 3;
-    private Thread projectileThread;
+    private int accumulatedTimeDestroyitSelf = 0;
+    public void IsReadyToReuse(boolean wantToDestroy){this.isReadyToReuse = wantToDestroy;}
     public Projectile(int worldX, int worldY)
     {
         try {
@@ -17,13 +20,8 @@ public class Projectile extends Entity implements Runnable, IUpdate {
            
             e.printStackTrace();
         }
-        StartThread();
+        
         setPosition(worldX, worldY);
-    }
-    private void StartThread()
-    {
-        projectileThread = new Thread(this);
-        projectileThread.start();
     }
     private void setPosition(int worldX,int worldY)
     {
@@ -31,24 +29,31 @@ public class Projectile extends Entity implements Runnable, IUpdate {
         this.worldY = worldY;
         speed = 20;
     }
-    public void update()
+    public void update(long deltaTime)
     {
+        accumulatedTimeDestroyitSelf+=deltaTime;
         this.worldY-=speed;
+        if(accumulatedTimeDestroyitSelf<timeDestroyitSelf*1000){return;}
+        accumulatedTimeDestroyitSelf = 0;
+        isReadyToReuse = true;
     }
     public void draw(Graphics2D g2,int tileSize)
     {
         g2.drawImage(entityImage,worldX, worldY,tileSize/7,tileSize/2,null);
     }
+    public boolean IsWantedDestroy(){return isReadyToReuse;}
     @Override
-    public void run() {
-        try {
-            Thread.sleep(timeDestroyitSelf*1000);
-            wantToDestroy = true;
-
-        } catch (InterruptedException e) {       
-            e.printStackTrace();
-        }
-
+    public boolean canReuse() {
+        
+        return isReadyToReuse;
     }
-    public boolean IsWantedDestroy(){return wantToDestroy;}
+    @Override
+    public void reuseObj() {
+         
+    }
+    public void reuseObj(int worldX, int worldY)
+    {
+        isReadyToReuse = false;
+        setPosition(worldX, worldY);  
+    }
 }

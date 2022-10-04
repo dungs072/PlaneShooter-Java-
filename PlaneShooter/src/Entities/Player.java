@@ -3,25 +3,33 @@ import java.awt.Graphics2D;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-import Entities.Interface.IUpdate;
+import java.awt.Rectangle;
+import Entities.Interface.*;
 
-import java.util.ArrayList;
 
 import main.*;
 public class Player extends Entity implements IUpdate{
     private GamePanel gamePanel;
     private KeyHandler keyHandler;
 
-    private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
+
+    private PoolManager poolProjectilesManager;
    
     private int maxX;
     private int maxY;
 
+    private CollisionChecker cChecker;
+    public CollisionChecker getCChecker(){return cChecker;}
     //position spawn projectile
     public Player(GamePanel gp, KeyHandler keyH)
     {
         gamePanel = gp;
         keyHandler = keyH;
+        poolProjectilesManager = new PoolManager();
+        
+        solidArea = new Rectangle(0,0,48,48);
+    
+        cChecker = new CollisionChecker(gp);
         setDefaultValues();
         getPlayerImage();
     }
@@ -47,34 +55,37 @@ public class Player extends Entity implements IUpdate{
             e.printStackTrace();
         }
     }
-    public void update()
+    public void update(long deltaTime)
     {
         handleMovement();
         handleFire();
-        handleProjectile();
+        handleProjectile(deltaTime);
     }
-    private void handleProjectile()
+    private void handleProjectile(long deltaTime)
     {
-        for(int i =0;i<projectiles.size();i++)
+        for(var tempProjectile:poolProjectilesManager.getPoolObjs())
         {
-            if(projectiles.get(i).IsWantedDestroy())
-            {
-                projectiles.remove(i);
-                i--;
-            }
-           
-        }
-        for(Projectile projectile:projectiles)
-        {
-            projectile.update();
+            Projectile projectile = (Projectile)tempProjectile;
+            //if(projectile.IsWantedDestroy()){continue;}
+            projectile.update(deltaTime);
         }
     }
     private void handleFire()
     {
         if(keyHandler.IsFirePressed())
         {
-            
-            projectiles.add(new Projectile(worldX+21,worldY-7));
+            IPoolObject tempObj = poolProjectilesManager.getReadyObject();
+            if(tempObj!=null)
+            {
+                Projectile projectile = (Projectile) tempObj;
+                projectile.reuseObj(worldX+21, worldY-7);
+            }
+            else
+            {
+                
+                poolProjectilesManager.AddPoolObject(new Projectile(worldX+21, worldY-7));  
+            }
+
 
         }
     }
@@ -83,19 +94,27 @@ public class Player extends Entity implements IUpdate{
         int valueY = worldY;
         if(keyHandler.IsUpPressed())
         {
+            nextDirection = Direction.FORWARD;
             valueY-=speed;
         }
         else if(keyHandler.IsDownPressed())
         {
+            nextDirection = Direction.BACKWARD;
             valueY+=speed;
         }
         else if(keyHandler.IsLeftPressed())
         {
+            nextDirection = Direction.LEFT;
             valueX-=speed;
         }
         else if(keyHandler.IsRightPressed())
         {
+            nextDirection = Direction.RIGHT;
             valueX+=speed;
+        }
+        else
+        {
+            nextDirection = Direction.NONE;
         }
 
         if(valueX<maxX-50&&valueX>0)
@@ -110,10 +129,11 @@ public class Player extends Entity implements IUpdate{
     public void draw(Graphics2D g2)
     {
         //g2.setColor(Color.white);
-        //g2.fillRect(x, y, gamePanel.getTileSize(), gamePanel.getTileSize());
-        for(Projectile projectile:projectiles)
+        g2.fillRect(worldX, worldY, 48, 48);
+        for(var tempProjectile:poolProjectilesManager.getPoolObjs())
         {
-            projectile.draw(g2,gamePanel.getTileSize());;
+            Projectile projectile = (Projectile)tempProjectile;
+            projectile.draw(g2,gamePanel.getTileSize());
         }
         g2.drawImage(entityImage, worldX, worldY,gamePanel.getTileSize(),gamePanel.getTileSize(),null);
         

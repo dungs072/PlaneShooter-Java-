@@ -1,5 +1,6 @@
 package main;
 import java.awt.*;
+
 import javax.swing.JPanel;
 import Entities.*;
 import Entities.Interface.IPoolObject;
@@ -28,6 +29,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     //Delta time
     private long deltaTime = 0;
+  
 
     //enemies
     private float timeSpawnEnemyAfterSecond = 2;
@@ -37,7 +39,7 @@ public class GamePanel extends JPanel implements Runnable{
         player = new Player(this, keyHandler);
         backGround = new Background();
         enemyPoolManager = new PoolManager();
-       
+        
     }
     public int getTileSize(){return tileSize;}
     public int getMaxScreenCol(){return maxScreenCol;}
@@ -90,7 +92,7 @@ public class GamePanel extends JPanel implements Runnable{
     }
     public void update()
     {
-        player.update();
+        player.update(deltaTime);
         spawnEnemy();
         updateEnemy();
         
@@ -129,7 +131,7 @@ public class GamePanel extends JPanel implements Runnable{
     {
         for (var enemy : enemyPoolManager.getPoolObjs()) {
             Enemy newEnemy = (Enemy)enemy;
-            newEnemy.update();
+            newEnemy.update(deltaTime);
         }
     }
     private void paintEnemy(Graphics2D g2)
