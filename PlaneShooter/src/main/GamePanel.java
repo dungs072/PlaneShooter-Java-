@@ -16,6 +16,9 @@ public class GamePanel extends JPanel implements Runnable{
     private final int screenWidth = tileSize* maxScreenCol;
     private final int screenHeight = tileSize* maxScreenRow;
 
+    //Collision
+    private CollisionChecker cChecker;
+    public CollisionChecker getCChecker(){return cChecker;}
     //FPS
     private final int FPS = 60;
 
@@ -25,7 +28,7 @@ public class GamePanel extends JPanel implements Runnable{
     private Background backGround;
 
     //Pool
-    private PoolManager enemyPoolManager;
+    public static PoolManager EnemyPoolManager;
 
     //Delta time
     private long deltaTime = 0;
@@ -36,9 +39,10 @@ public class GamePanel extends JPanel implements Runnable{
     private float accumulateTimeSpawnEnemy = 0;
     {
         keyHandler = new KeyHandler();
+        EnemyPoolManager = new PoolManager();
         player = new Player(this, keyHandler);
         backGround = new Background();
-        enemyPoolManager = new PoolManager();
+        cChecker = new CollisionChecker(this);
         
     }
     public int getTileSize(){return tileSize;}
@@ -95,7 +99,7 @@ public class GamePanel extends JPanel implements Runnable{
         player.update(deltaTime);
         spawnEnemy();
         updateEnemy();
-        
+        handleCollision();
     }
     
     public void paintComponent(Graphics g)
@@ -108,6 +112,18 @@ public class GamePanel extends JPanel implements Runnable{
         player.draw(g2);
         g2.dispose();
     }
+    private void handleCollision()
+    {
+        for(var tempObj : EnemyPoolManager.getPoolObjs())
+        {
+            if(tempObj.canReuse()){continue;}
+            Entity entity = (Entity)tempObj;
+            if(entity.getSolidArea().intersects(player.getSolidArea()))
+            {
+                System.out.println("Boom");
+            }
+        }
+    }
     //enemy
     private void spawnEnemy()
     {
@@ -115,28 +131,28 @@ public class GamePanel extends JPanel implements Runnable{
         if(accumulateTimeSpawnEnemy<timeSpawnEnemyAfterSecond*1000){return;}
         accumulateTimeSpawnEnemy = 0;
         
-        IPoolObject tempObj = enemyPoolManager.getReadyObject();
+        IPoolObject tempObj = EnemyPoolManager.getReadyObject();
         if(tempObj!=null)
         {
             tempObj.reuseObj();
         }
         else
         {
-            enemyPoolManager.AddPoolObject(new Enemy(this));
+            EnemyPoolManager.AddPoolObject(new Enemy(this));
         }
       
     }
 
     private void updateEnemy()
     {
-        for (var enemy : enemyPoolManager.getPoolObjs()) {
+        for (var enemy : EnemyPoolManager.getPoolObjs()) {
             Enemy newEnemy = (Enemy)enemy;
             newEnemy.update(deltaTime);
         }
     }
     private void paintEnemy(Graphics2D g2)
     {
-        for (var enemy : enemyPoolManager.getPoolObjs()) {
+        for (var enemy : EnemyPoolManager.getPoolObjs()) {
             Enemy newEnemy = (Enemy)enemy;
             newEnemy.draw(g2);
         }

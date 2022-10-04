@@ -42,6 +42,7 @@ public class Enemy extends Entity implements IUpdate, IPoolObject{
         solidArea = new Rectangle(0,0,105,96);
         setDefaultValue();
         
+        
     }
     public void setDefaultValue()
     {
@@ -191,6 +192,7 @@ public class Enemy extends Entity implements IUpdate, IPoolObject{
         {
             worldY-=speed;
         }
+        solidArea.setLocation(worldX, worldY);
     }
     public void draw(Graphics2D g2)
     {

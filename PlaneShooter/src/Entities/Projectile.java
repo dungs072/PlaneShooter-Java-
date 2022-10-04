@@ -6,6 +6,8 @@ import javax.imageio.ImageIO;
 
 import Entities.Interface.IPoolObject;
 import Entities.Interface.IUpdate;
+import main.GamePanel;
+import main.PoolManager;
 public class Projectile extends Entity implements IUpdate,IPoolObject {
 
     private boolean isReadyToReuse = false;
@@ -20,7 +22,7 @@ public class Projectile extends Entity implements IUpdate,IPoolObject {
            
             e.printStackTrace();
         }
-        
+        solidArea = new Rectangle(0,0,10,10);
         setPosition(worldX, worldY);
     }
     private void setPosition(int worldX,int worldY)
@@ -31,14 +33,30 @@ public class Projectile extends Entity implements IUpdate,IPoolObject {
     }
     public void update(long deltaTime)
     {
+        solidArea.setLocation(worldX, worldY);
         accumulatedTimeDestroyitSelf+=deltaTime;
         this.worldY-=speed;
+        OnCollisionCheck();
         if(accumulatedTimeDestroyitSelf<timeDestroyitSelf*1000){return;}
         accumulatedTimeDestroyitSelf = 0;
         isReadyToReuse = true;
     }
+    private void OnCollisionCheck()
+    {
+        PoolManager poolEnemy = GamePanel.EnemyPoolManager;
+        for(var tempObj: poolEnemy.getPoolObjs())
+        {
+            if(tempObj.canReuse()){continue;}
+            Enemy enemy = (Enemy)tempObj;
+            if(solidArea.intersects(enemy.getSolidArea()))
+            {
+                System.out.println("nice shoot");
+            }
+        }
+    }
     public void draw(Graphics2D g2,int tileSize)
     {
+        g2.fillRect(worldX, worldY, 6, 18);
         g2.drawImage(entityImage,worldX, worldY,tileSize/7,tileSize/2,null);
     }
     public boolean IsWantedDestroy(){return isReadyToReuse;}

@@ -18,8 +18,8 @@ public class Player extends Entity implements IUpdate{
     private int maxX;
     private int maxY;
 
-    private CollisionChecker cChecker;
-    public CollisionChecker getCChecker(){return cChecker;}
+
+    
     //position spawn projectile
     public Player(GamePanel gp, KeyHandler keyH)
     {
@@ -29,7 +29,7 @@ public class Player extends Entity implements IUpdate{
         
         solidArea = new Rectangle(0,0,48,48);
     
-        cChecker = new CollisionChecker(gp);
+      
         setDefaultValues();
         getPlayerImage();
     }
@@ -125,6 +125,7 @@ public class Player extends Entity implements IUpdate{
         {
             worldY = valueY;
         }
+        solidArea.setLocation(worldX,worldY);
     }
     public void draw(Graphics2D g2)
     {
