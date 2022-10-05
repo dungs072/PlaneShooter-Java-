@@ -19,6 +19,9 @@ public class GamePanel extends JPanel implements Runnable{
     //Collision
     private CollisionChecker cChecker;
     public CollisionChecker getCChecker(){return cChecker;}
+
+    
+
     //FPS
     private final int FPS = 60;
 
@@ -27,11 +30,12 @@ public class GamePanel extends JPanel implements Runnable{
     private KeyHandler keyHandler;
     private Background backGround;
 
-    //Pool
-    public static PoolManager EnemyPoolManager;
+    //Pool Enemy
+    public static final PoolManager EnemyPoolManager = new PoolManager();
 
     //Delta time
     private long deltaTime = 0;
+    public long getDeltaTime(){return deltaTime;}
   
 
     //enemies
@@ -39,7 +43,6 @@ public class GamePanel extends JPanel implements Runnable{
     private float accumulateTimeSpawnEnemy = 0;
     {
         keyHandler = new KeyHandler();
-        EnemyPoolManager = new PoolManager();
         player = new Player(this, keyHandler);
         backGround = new Background();
         cChecker = new CollisionChecker(this);
@@ -120,6 +123,7 @@ public class GamePanel extends JPanel implements Runnable{
             Entity entity = (Entity)tempObj;
             if(entity.getSolidArea().intersects(player.getSolidArea()))
             {
+                player.createBoomEffect();
                 System.out.println("Boom");
             }
         }

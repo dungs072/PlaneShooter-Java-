@@ -4,6 +4,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import java.awt.Rectangle;
+
+import Entities.Effects.BoomEffect;
 import Entities.Interface.*;
 
 
@@ -11,9 +13,11 @@ import main.*;
 public class Player extends Entity implements IUpdate{
     private GamePanel gamePanel;
     private KeyHandler keyHandler;
-
+    private BoomEffect currentBoomEffect;
 
     private PoolManager poolProjectilesManager;
+
+    private boolean canBoom = false;
    
     private int maxX;
     private int maxY;
@@ -26,10 +30,10 @@ public class Player extends Entity implements IUpdate{
         gamePanel = gp;
         keyHandler = keyH;
         poolProjectilesManager = new PoolManager();
-        
+
         solidArea = new Rectangle(0,0,48,48);
     
-      
+        
         setDefaultValues();
         getPlayerImage();
     }
@@ -60,6 +64,27 @@ public class Player extends Entity implements IUpdate{
         handleMovement();
         handleFire();
         handleProjectile(deltaTime);
+        handleBooming();
+    }
+    
+    public void createBoomEffect()
+    {
+        if(canBoom){return;}
+        canBoom = true;
+        currentBoomEffect = new BoomEffect(gamePanel, worldX, worldY);
+    }
+    private void handleBooming()
+    {
+        if(canBoom)
+        {
+            if(currentBoomEffect.canReuse())
+            {
+                canBoom = false;
+                currentBoomEffect = null;
+                return;
+            }
+            currentBoomEffect.reuseObj(worldX, worldY);
+        }
     }
     private void handleProjectile(long deltaTime)
     {
@@ -83,7 +108,7 @@ public class Player extends Entity implements IUpdate{
             else
             {
                 
-                poolProjectilesManager.AddPoolObject(new Projectile(worldX+21, worldY-7));  
+                poolProjectilesManager.AddPoolObject(new Projectile(gamePanel,worldX+21, worldY-7));  
             }
 
 
@@ -127,6 +152,7 @@ public class Player extends Entity implements IUpdate{
         }
         solidArea.setLocation(worldX,worldY);
     }
+  
     public void draw(Graphics2D g2)
     {
         //g2.setColor(Color.white);
@@ -137,6 +163,12 @@ public class Player extends Entity implements IUpdate{
             projectile.draw(g2,gamePanel.getTileSize());
         }
         g2.drawImage(entityImage, worldX, worldY,gamePanel.getTileSize(),gamePanel.getTileSize(),null);
+        
+        if(currentBoomEffect!=null)
+        {
+            currentBoomEffect.draw(g2);
+        }
+       
         
     }
 }
